@@ -3,11 +3,14 @@ package com.example.Dar.model;
 
 
 import java.util.Objects;
+import javax.validation.constraints.NotNull;
+
 
 
 public class Package {
     private static long cnt;
     private  long id;
+    @NotNull(message = "description cannot be null")
     private String description;
     private Status status;
 

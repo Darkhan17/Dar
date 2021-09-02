@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Vector;
 
 @RestController
@@ -37,18 +38,19 @@ public class PostController {
     }
 
     @PostMapping()
-    public ResponseEntity<Package> createPackage(@RequestBody Package pack){
+    public ResponseEntity<Package> createPackage(@Valid @RequestBody Package pack){
         pack.setStatus(Status.IN_PROGRESS);
         database.addToDatabase(pack);
         return new ResponseEntity<Package>(pack,HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Package> updatePackage(@RequestBody Package pack,@PathVariable long id){
+    public ResponseEntity<Package> updatePackage(@Valid @RequestBody Package pack,@PathVariable long id){
         Package mail = database.getPackage(id);
         mail.setDescription(pack.getDescription());
         return new ResponseEntity<Package>(mail,HttpStatus.OK);
     }
+
 
     @PutMapping("/{id}/complete")
     ResponseEntity<?> complete(@PathVariable Long id) {
@@ -62,6 +64,5 @@ public class PostController {
 
         return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
     }
-
 
 }
