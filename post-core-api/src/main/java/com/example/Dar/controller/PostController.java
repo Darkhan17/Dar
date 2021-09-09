@@ -4,7 +4,9 @@ package com.example.Dar.controller;
 import com.example.Dar.database.Database;
 import com.example.Dar.model.Package;
 import com.example.Dar.model.Status;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.parsing.Problem;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +20,15 @@ import java.util.Vector;
 public class PostController {
 
     Database database  = Database.getInstance();
+    @Autowired
+    Environment environment;
 
+
+    @GetMapping("/healthcheck")
+    public String healthCheck(){
+
+        return "it's working on port: " + environment.getProperty("local.server.port") ;
+    }
     @GetMapping()
     public Vector<Package> check(){
         return database.getAllPackages();
@@ -45,7 +55,7 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Package> updatePackage(@Valid @RequestBody Package pack,@PathVariable long id){
+    public ResponseEntity<Package> updatePackage(@Valid @RequestBody Package pack, @PathVariable long id){
         Package mail = database.getPackage(id);
         mail.setDescription(pack.getDescription());
         return new ResponseEntity<Package>(mail,HttpStatus.OK);
