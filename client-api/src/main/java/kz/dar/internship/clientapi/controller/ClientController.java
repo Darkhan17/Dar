@@ -2,10 +2,8 @@ package kz.dar.internship.clientapi.controller;
 
 
 import kz.dar.internship.clientapi.feign.ClientFeign;
-import kz.dar.internship.clientapi.model.ClientDTO;
-import kz.dar.internship.clientapi.model.ClientRequestModel;
-import kz.dar.internship.clientapi.model.ClientResponseModel;
-import kz.dar.internship.clientapi.model.PackageViewModel;
+import kz.dar.internship.clientapi.feign.ClientPaymentFeign;
+import kz.dar.internship.clientapi.model.*;
 import kz.dar.internship.clientapi.service.ClientService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -25,6 +23,9 @@ public class ClientController {
     @Autowired
     ClientFeign clientFeign;
 
+    @Autowired
+    ClientPaymentFeign clientPaymentFeign;
+
     private ModelMapper modelMapper;
 
     ClientController(){
@@ -43,12 +44,6 @@ public class ClientController {
         return clientService.getClient(id);
     }
 
-    @GetMapping("packages/{id}")
-    public List<PackageViewModel> getPackageListBySenderId(@PathVariable String id){
-        return clientFeign.getListPackageBySenderId(id);
-    }
-
-
     @PostMapping("/register")
     public ClientResponseModel createUser(@Valid @RequestBody ClientRequestModel clientRequestModel){
         ClientDTO packageDTO = modelMapper.map(clientRequestModel, ClientDTO.class);
@@ -56,6 +51,22 @@ public class ClientController {
         ClientResponseModel clientResponseModel = clientService.createAndUpdate(packageDTO);
         return clientResponseModel;
 
+    }
+
+
+    // POST-CORE-API
+
+    @GetMapping("packages/{id}")
+    public List<PackageViewModel> getPackageListBySenderId(@PathVariable String id){
+        return clientFeign.getListPackageBySenderId(id);
+    }
+
+
+    //SERVICE-API
+
+    @GetMapping("/payments")
+    public List<ClientPaymentResponse> getClinetPaymentsListBySenderId(@RequestParam String clientId){
+        return clientPaymentFeign.getClientPaymentList(clientId);
     }
 
 

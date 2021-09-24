@@ -18,7 +18,4 @@ public interface ClientFeign {
     @GetMapping("/client/{clientId}")
     List<PackageViewModel> getListPackageBySenderId(@PathVariable String clientId);
 
-
-
-    
 }
