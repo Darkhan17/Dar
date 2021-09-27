@@ -1,13 +1,18 @@
 package kz.dar.serviceapi.model;
 
+import java.util.List;
+
 public class ClientPaymentViewModel {
     private String id;
 
     private ClientResponseModel client;
 
-    private double amount;
 
-    private ServiceType serviceType;
+    private double totalAmount;
+
+    private String address;
+
+    private List<ServicePayment> servicePayments;
 
     public String getId() {
         return id;
@@ -15,6 +20,11 @@ public class ClientPaymentViewModel {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+
+    public double getTotalAmount() {
+        return totalAmount;
     }
 
     public ClientResponseModel getClient() {
@@ -25,19 +35,23 @@ public class ClientPaymentViewModel {
         this.client = client;
     }
 
-    public double getAmount() {
-        return amount;
+    public void setTotalAmount(double totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
-    public void setAmount(double amount) {
-        this.amount = amount;
+    public String getAddress() {
+        return address;
     }
 
-    public ServiceType getServiceType() {
-        return serviceType;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
-    public void setServiceType(ServiceType serviceType) {
-        this.serviceType = serviceType;
+    public List<ServicePayment> getServicePayments() {
+        return servicePayments;
+    }
+
+    public void setServicePayments(List<ServicePayment> servicePayments) {
+        this.servicePayments = servicePayments;
     }
 }

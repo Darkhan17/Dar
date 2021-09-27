@@ -6,8 +6,24 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 public class ClientPaymentRequest {
+
+    private String id;
+
+    @NotNull(message = "ClientId can't be null")
+    private String clientId;
+
+    private String totalAmount;
+
+    @NotNull(message = "Services can't be null")
+    private List<ServicePayment> servicePayments;
+
+    @NotNull(message = "Address can't be null")
+    private String address;
+
+
     public String getId() {
         return id;
     }
@@ -24,35 +40,27 @@ public class ClientPaymentRequest {
         this.clientId = clientId;
     }
 
-    public String getAmount() {
-        return amount;
+    public String getTotalAmount() {
+        return totalAmount;
     }
 
-    public void setAmount(String amount) {
-        this.amount = amount;
+    public void setTotalAmount(String totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
-    public ServiceType getServiceType() {
-        return serviceType;
+    public List<ServicePayment> getServicePayments() {
+        return servicePayments;
     }
 
-    public void setServiceType(ServiceType serviceType) {
-        this.serviceType = serviceType;
+    public void setServicePayments(List<ServicePayment> servicePayments) {
+        this.servicePayments = servicePayments;
     }
 
-    private String id;
+    public String getAddress() {
+        return address;
+    }
 
-    //@NotNull(message = "ClientId can't be null")
-    private String clientId;
-
-    //@NotNull(message = "Amount to pay can't be null")
-    private String amount;
-
-    //@NotNull(message = "Service type can't be null")
-    private ServiceType serviceType;
-
-
-
-
-
+    public void setAddress(String address) {
+        this.address = address;
+    }
 }

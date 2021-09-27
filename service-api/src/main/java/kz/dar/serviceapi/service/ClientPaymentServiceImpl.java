@@ -5,6 +5,7 @@ import kz.dar.serviceapi.exeptions.ClientPaymentNotFound;
 import kz.dar.serviceapi.model.ClientPaymentDTO;
 import kz.dar.serviceapi.model.ClientPaymentResponse;
 import kz.dar.serviceapi.model.ClientResponseModel;
+import kz.dar.serviceapi.model.ServicePayment;
 import kz.dar.serviceapi.repository.entiry.ClientPaymentEntity;
 import kz.dar.serviceapi.repository.entiry.ClientPaymentRepository;
 import org.modelmapper.ModelMapper;
@@ -36,6 +37,8 @@ public class ClientPaymentServiceImpl implements ClientPaymentService{
     @Override
     public ClientPaymentResponse createClientPayment(ClientPaymentDTO clientPaymentDTO) {
         ClientPaymentEntity clientPaymentEntity = modelMapper.map(clientPaymentDTO, ClientPaymentEntity.class);
+        double totalAmount = clientPaymentEntity.getServicePayments().stream().mapToDouble(ServicePayment::getAmount).sum();
+        clientPaymentEntity.setTotalAmount(totalAmount);
         clientPaymentEntity = clientPaymentRepository.save(clientPaymentEntity);
         ClientPaymentResponse clientPaymentResponse = modelMapper.map(clientPaymentEntity, ClientPaymentResponse.class);
         return clientPaymentResponse;
@@ -57,11 +60,10 @@ public class ClientPaymentServiceImpl implements ClientPaymentService{
     }
 
     @Override
-    public List<ClientPaymentResponse> getClientPaymentList(int page) {
+    public Page<ClientPaymentResponse> getClientPaymentList(int page) {
         Pageable pageable = PageRequest.of(page,5);
-        Page<ClientPaymentEntity> clientPayments = clientPaymentRepository.findAll(pageable);
-        List<ClientPaymentResponse> clientPaymentResponseList = (List<ClientPaymentResponse>) clientPayments.stream().map(payment->modelMapper.map(payment,ClientPaymentResponse.class)).collect(Collectors.toList());
-        return clientPaymentResponseList;
+        Page<ClientPaymentResponse> clientPayments = clientPaymentRepository.findAll(pageable).map(payment ->modelMapper.map(payment,ClientPaymentResponse.class));
+        return clientPayments;
     }
 
     @Override
@@ -71,12 +73,15 @@ public class ClientPaymentServiceImpl implements ClientPaymentService{
 
     @Override
     public ClientPaymentResponse updateClientPayment(String id, ClientPaymentDTO clientPaymentDTO) {
+
         ClientPaymentEntity clientPaymentEntity = modelMapper.map(clientPaymentDTO, ClientPaymentEntity.class);
         return clientPaymentRepository.findById(id)
                 .map(clientPayment -> {
-                    clientPayment.setAmount(clientPaymentEntity.getAmount());
+                    clientPayment.setTotalAmount(clientPaymentEntity.getTotalAmount());
                     clientPayment.setClientId(clientPaymentEntity.getClientId());
-                    clientPayment.setServiceType(clientPaymentEntity.getServiceType());
+                    clientPayment.setServicePayments(clientPaymentEntity.getServicePayments());
+                    double totalAmount = clientPaymentEntity.getServicePayments().stream().mapToDouble(ServicePayment::getAmount).sum();
+                    clientPayment.setTotalAmount(totalAmount);
                     clientPaymentRepository.save(clientPayment);
                     return modelMapper.map(clientPayment,ClientPaymentResponse.class);
                 })
@@ -87,5 +92,9 @@ public class ClientPaymentServiceImpl implements ClientPaymentService{
                 });
     }
 
+
+    public void deleteAllData(){
+        clientPaymentRepository.deleteAll();
+    }
 
 }

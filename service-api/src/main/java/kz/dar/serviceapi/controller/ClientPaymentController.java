@@ -9,6 +9,7 @@ import org.apache.http.protocol.HTTP;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,9 +46,10 @@ public class ClientPaymentController {
 
     @PostMapping()
     public ResponseEntity<ClientPaymentResponse> createServicePayment(@RequestBody ClientPaymentRequest clientPaymentRequest){
-
         ClientPaymentDTO clientPaymentDTO = modelMapper.map(clientPaymentRequest, ClientPaymentDTO.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(clientPaymentService.createClientPayment(clientPaymentDTO));
+
+
     }
 
     @GetMapping("/{id}")
@@ -59,9 +61,17 @@ public class ClientPaymentController {
 
 
     @GetMapping("/all/{page}")
-    public List<ClientPaymentViewModel> getPaymentList(@PathVariable int page){
-        List<ClientPaymentViewModel> clientPayments = clientPaymentService.getClientPaymentList(page).stream().map(payment->getViewModel(payment)).collect(Collectors.toList());
+    public Page<ClientPaymentViewModel> getPaymentPage(@PathVariable int page){
+        Page<ClientPaymentViewModel> clientPayments = clientPaymentService.getClientPaymentList(page-1).map(payment->getViewModel(payment));
         return clientPayments;
+    }
+
+    @GetMapping("/all/list/{page}")
+    public ResponseEntity<ResponseList> getPaymentList(@PathVariable int page){
+        Page<ClientPaymentViewModel> clientPayments = clientPaymentService.getClientPaymentList(page-1).map(payment->getViewModel(payment));
+        List<ClientPaymentViewModel> clientPaymentResponses = clientPayments.stream().collect(Collectors.toList());
+        ResponseList responseList = new ResponseList(clientPayments);
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
     @DeleteMapping("/{id}")
@@ -84,6 +94,11 @@ public class ClientPaymentController {
     public List<ClientPaymentResponse> getClientPaymentList(@RequestParam String clientId){
         List<ClientPaymentResponse> clientPaymentResponseList = clientPaymentService.getClientPaymentByClientId(clientId);
         return clientPaymentResponseList;
+    }
+
+    @DeleteMapping("delete")
+    public void deleteAllData(){
+        deleteAllData();
     }
 
 
