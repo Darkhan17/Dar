@@ -1,22 +1,26 @@
 package kz.dar.serviceapi.controller;
 
 
+import kz.dar.serviceapi.config.MessaginConfig;
 import kz.dar.serviceapi.feign.ClientFeign;
+import kz.dar.serviceapi.mail.Sender;
 import kz.dar.serviceapi.model.*;
-import kz.dar.serviceapi.service.ClientPaymentService;
 import kz.dar.serviceapi.service.ClientPaymentServiceImpl;
-import org.apache.http.protocol.HTTP;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Validated
 @RestController
 @RequestMapping("/service")
 public class ClientPaymentController {
@@ -27,7 +31,11 @@ public class ClientPaymentController {
     @Autowired
     ClientFeign clientFeign;
 
+    @Autowired
+    private RabbitTemplate template;
+
     private ModelMapper modelMapper;
+
 
     ClientPaymentController(){
         this.modelMapper = new ModelMapper();
@@ -42,14 +50,24 @@ public class ClientPaymentController {
         return clientPaymentViewModel;
     }
 
+    private void sendToEmail(ClientPaymentViewModel clientPaymentViewModel){
+        template.convertAndSend(MessaginConfig.EXCHANGE, MessaginConfig.ROUTING_KEY, clientPaymentViewModel);
+    }
+
+
+    @GetMapping("/check")
+    public String check() throws Exception {
+        template.convertAndSend(MessaginConfig.EXCHANGE, MessaginConfig.ROUTING_KEY, "hello");
+        return "Success !!";
+    }
 
 
     @PostMapping()
-    public ResponseEntity<ClientPaymentResponse> createServicePayment(@RequestBody ClientPaymentRequest clientPaymentRequest){
+    public ResponseEntity<ClientPaymentResponse> createServicePayment(@Valid @RequestBody ClientPaymentRequest clientPaymentRequest){
         ClientPaymentDTO clientPaymentDTO = modelMapper.map(clientPaymentRequest, ClientPaymentDTO.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(clientPaymentService.createClientPayment(clientPaymentDTO));
-
-
+        ClientPaymentResponse clientPaymentResponse = clientPaymentService.createClientPayment(clientPaymentDTO);
+        sendToEmail(getViewModel(clientPaymentResponse));
+        return ResponseEntity.status(HttpStatus.CREATED).body(clientPaymentResponse);
     }
 
     @GetMapping("/{id}")
@@ -61,8 +79,9 @@ public class ClientPaymentController {
 
 
     @GetMapping("/all/{page}")
-    public Page<ClientPaymentViewModel> getPaymentPage(@PathVariable int page){
-        Page<ClientPaymentViewModel> clientPayments = clientPaymentService.getClientPaymentList(page-1).map(payment->getViewModel(payment));
+    public Page<ClientPaymentResponse> getPaymentPage(@PathVariable int page){
+        /*Page<ClientPaymentViewModel> clientPayments = clientPaymentService.getClientPaymentList(page-1).map(payment->getViewModel(payment));*/
+        Page<ClientPaymentResponse> clientPayments = clientPaymentService.getClientPaymentList(page-1);
         return clientPayments;
     }
 

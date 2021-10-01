@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class ClientPaymentRequest {
 
     private String totalAmount;
 
-    @NotNull(message = "Services can't be null")
+    @Valid
     private List<ServicePayment> servicePayments;
 
     @NotNull(message = "Address can't be null")

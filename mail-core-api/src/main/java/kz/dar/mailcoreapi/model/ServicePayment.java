@@ -1,9 +1,7 @@
-package kz.dar.serviceapi.model;
+package kz.dar.mailcoreapi.model;
 
-import org.hibernate.validator.constraints.Range;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.*;
 
 
 @Validated
@@ -26,11 +24,15 @@ public class ServicePayment {
         this.amount = amount;
     }
 
-    @NotNull
     private ServiceType serviceType;
 
-    @NotNull
-    @Positive
     private double amount;
 
+    @Override
+    public String toString() {
+        return "ServicePayment{" +
+                "serviceType=" + serviceType +
+                ", amount=" + amount +
+                '}';
+    }
 }
